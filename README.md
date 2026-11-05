@@ -33,30 +33,43 @@ Some of the popular websites that Scramjet supports include:
 - [GeForce NOW](https://play.geforcenow.com/)
 - [now.gg](https://now.gg)
 
-## Development
+## Running Without Node.js
 
-### Dependencies
+The included Python launcher runs both the static Scramjet proxy page and the
+Wisp server. Node.js, npm, pnpm, Rust, and a frontend build are not required.
+CPython 3.11 through 3.14.2 is supported. On Python 3.14, the launcher uses
+a single interpreter because `wisp-python` currently attempts to load native
+dependencies such as `psutil` in subinterpreters, which Python 3.14 does not
+allow.
 
-- Recent versions of `node.js` and `pnpm`
-- `rustup`
-- `wasm-bindgen`
-- [Binaryen's `wasm-opt`](https://github.com/WebAssembly/binaryen)
-- [this `wasm-snip` fork](https://github.com/r58Playz/wasm-snip)
-
-#### Building
-
-- Clone the repository with `git clone --recursive https://github.com/MercuryWorkshop/scramjet`
-- Install the dependencies with `pnpm i`
-- Change directories with `cd packages/core`
-- Build the rewriter with `pnpm rewriter:build`
-- Build Scramjet with `pnpm build`
-
-### Running Scramjet Locally
-
-You can run the Scramjet dev server when running this command at the root
+Install the maintained Python Wisp implementation in a virtual environment:
 
 ```sh
-pnpm dev
+python3 -m venv .venv
+. .venv/bin/activate
+python -m pip install wisp-python
 ```
 
-The demo page for scramjet should now be running at <http://localhost:4141> and should rebuild upon a file being changed (excluding the rewriter).
+Start the proxy:
+
+```sh
+python python_server.py --allow-loopback --allow-private
+```
+
+Open <http://127.0.0.1:3030>. The Wisp WebSocket endpoint uses the same
+origin. The included `service-worker.js` registers the Scramjet service worker,
+and the browser bootstrap bundle is loaded from jsDelivr. The first page load
+may ask the browser to reload once while the service worker activates. To use a
+different port:
+
+```sh
+python python_server.py --port 8080 --allow-loopback --allow-private
+```
+
+The `--allow-loopback` and `--allow-private` options are useful for local
+development only. Do not enable them on a publicly reachable server unless
+you intentionally want to allow access to private network addresses.
+
+The included service worker also applies a compatibility fix for the published
+Scramjet bootstrap bundle, which otherwise cannot resolve the current
+controller's Scramjet peer dependency.

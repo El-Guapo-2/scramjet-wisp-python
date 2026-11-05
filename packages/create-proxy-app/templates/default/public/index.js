@@ -9,7 +9,11 @@ const errorCode = document.getElementById("sj-error-code");
 let controller;
 let frame;
 async function init() {
-	controller = await initBootstrap();
+	controller = await initBootstrap({
+		filePath: "/service-worker.js",
+		scramjetUtilsBundlePath:
+			"https://cdn.jsdelivr.net/npm/@mercuryworkshop/scramjet-utils@0.0.3/dist/scramjet-utils.js",
+	});
 
 	const cachePlugin = new $scramjetUtils.HttpCachePlugin();
 	const urlWatcher = new $scramjetUtils.UrlWatcherPlugin((url) => {
@@ -24,13 +28,17 @@ async function init() {
 	});
 }
 
-function showErrorScreen(error, details) {
+function showErrorScreen(errorMessage, details) {
 	frameWrapper.style.display = "none";
-	error.textContent = error;
+	error.textContent = errorMessage;
 	errorCode.textContent = details;
 }
 
 async function navigate(url) {
+	url = url.trim();
+	if (!url) {
+		throw new Error("Enter a URL to continue.");
+	}
 	if (!frame || !controller) {
 		await init();
 	}
@@ -45,8 +53,15 @@ form.addEventListener("submit", async (e) => {
 	e.preventDefault();
 	try {
 		await navigate(address.value);
-	} catch (error) {
-		showErrorScreen(error.message, error.stack);
+	} catch (err) {
+		showErrorScreen(err.message, err.stack);
+	}
+});
+
+address.addEventListener("keydown", (e) => {
+	if (e.key === "Enter") {
+		e.preventDefault();
+		form.requestSubmit();
 	}
 });
 

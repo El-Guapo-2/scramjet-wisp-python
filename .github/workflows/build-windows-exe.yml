@@ -1,0 +1,31 @@
+name: Build Windows executable
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.14"
+          architecture: x64
+
+      - name: Install runtime and build dependencies
+        shell: pwsh
+        run: python -m pip install --upgrade pip pyinstaller wisp-python
+
+      - name: Build console executable
+        run: pyinstaller --clean --noconfirm python_server.spec
+
+      - name: Upload executable
+        uses: actions/upload-artifact@v4
+        with:
+          name: scramjet-python-server-windows-x64
+          path: dist/scramjet-python-server.exe

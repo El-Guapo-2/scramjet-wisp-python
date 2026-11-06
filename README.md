@@ -73,3 +73,15 @@ you intentionally want to allow access to private network addresses.
 The included service worker also applies a compatibility fix for the published
 Scramjet bootstrap bundle, which otherwise cannot resolve the current
 controller's Scramjet peer dependency.
+
+The launcher opens `http://127.0.0.1:3030/` in the default browser
+automatically. Use `--no-browser` to disable this behavior.
+
+## Windows executable
+
+The repository includes a console-mode Windows x64 build workflow. Run the
+`Build Windows executable` workflow manually from GitHub Actions and download
+the `scramjet-python-server-windows-x64` artifact. The executable keeps its
+terminal window open while the server runs and opens the default browser
+automatically. The workflow bundles the Python runtime, Wisp dependencies, and
+frontend assets; Python does not need to be installed on the target machine.
